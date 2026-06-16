@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 load_dotenv()
 
@@ -8,9 +9,11 @@ KEY = os.getenv("GEMINI_API_KEY")
 if not KEY:
     raise ValueError("Gemini API Key Not Found")
 
-client = genai.Client(KEY)
+client = genai.Client()
 
 MODEL = "gemini-3.1-flash-lite"
+
+types.GenerateContentConfig(temperature=0.8)
 
 def generate(query: str, history: list[str] | None = None) -> str:
     history = history or []
@@ -29,8 +32,11 @@ def generate(query: str, history: list[str] | None = None) -> str:
     prompt = "\n".join(conversation_parts)
 
     print("[LLM] Sending Prompt...")
+    
     response = client.models.generate_content(model=MODEL, contents=prompt)
 
     text = response.text.strip() if response.text else "Sorry, I couldn't generate a reply"
 
     print(f"[LLM] LLM Replied: {text}")
+
+    return text
